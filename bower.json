@@ -1,0 +1,8 @@
+{
+  "name": "liquid-elements",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#master",
+    "liquid.js": "TangereJs/liquid.js#master"
+  }
+}
