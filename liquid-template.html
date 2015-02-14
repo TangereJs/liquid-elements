@@ -8,45 +8,78 @@
   </template>
 
   <script>
-    Polymer('liquid-template', {
-      data: {},
-      domReady: function () {
+    (function () {
+      var templateCache = {};
 
-      },
-      render: function () {
-        try {
+      Polymer('liquid-template', {
+        data: {},
+
+        ready: function () {
+          this.templateCache = templateCache;
+        },
+
+        domReady: function () {
+
+        },
+
+        render: function () {
+          try {
+            var tmpl = this.getCompiledTemplate();
+            if (!tmpl) return;
+
+            var html = tmpl.render(this.data);
+
+            //this.shadowRoot.innerHTML = html;            
+
+            // based on code from injectBoundHTML
+            var template = document.createElement('template');
+            template.innerHTML = html;
+            var fragment = this.instanceTemplate(template);
+            this.shadowRoot.textContent = '';
+            this.shadowRoot.appendChild(fragment);
+
+          } catch (ex) {
+            var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
+            console.log(em);
+            var emdiv = document.createElement('div');
+            emdiv.innerHTML = em;
+            this.shadowRoot.appendChild(emdiv);
+          }
+        },
+
+        getCompiledTemplate: function () {
           var src = this.innerHTML.trim();
-          if (!src) return;
+          if (!src) return null;
+
+          var cacheKey = "unknown";
+
+          if (this.parentNode) {
+            if (this.parentNode.id) cacheKey = this.parentNode.id;
+            if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
+          }
+
+          // return compiled template if already cached
+          var cacheEntry = this.templateCache[cacheKey];
+          if(cacheEntry) {            
+            if(cacheEntry.template == src)  return cacheEntry.compiledTemplate;
+          }
 
           var tmpl = Liquid.parse(src);
-
-          var html = tmpl.render(this.data);
-
-          //this.shadowRoot.innerHTML = html;            
-
-          // based on code from injectBoundHTML
-          var template = document.createElement('template');
-          template.innerHTML = html;
-          var fragment = this.instanceTemplate(template);
-          this.shadowRoot.textContent = '';
-          this.shadowRoot.appendChild(fragment);
           
-        } catch (ex) {
-          var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
-          console.log(em);
-          var emdiv = document.createElement('div');
-          emdiv.innerHTML = em ;
-          this.shadowRoot.appendChild(emdiv);
+          // store compiled template in cache
+          this.templateCache[cacheKey] = { template: src, compiledTemplate: tmpl }              
+          
+          return tmpl;
+        },
+
+        dataChanged: function () {
+
+          this.render();
+
         }
-      },
-      dataChanged: function () {
-        
-        this.render();
 
-      },
-      ready: function () {
+      });
 
-      }
-    });
+    })();
   </script>
 </polymer-element>

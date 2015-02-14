@@ -16,13 +16,24 @@
 <body unresolved>
 
   <div class="demo">
+    
     <liquid-template id="template1">
 
       Hello, {{ current_user }}!
       <br>
-      <br>      
+      <br>
       <a on-click='{% mustache clickhandler %}'>Click me</a> 
-      
+
+    </liquid-template>
+      <br>
+      <br>
+    <liquid-template id="template2">
+
+      Hello, {{ current_user }}!
+      <br>
+      <br>
+      <a on-click='{% mustache clickhandler %}'>Click me</a> 
+
     </liquid-template>
   </div>
 
@@ -33,7 +44,15 @@
         current_user: "World"
       }
     });
+
+    window.addEventListener('polymer-ready', function (e) {
+      var demo = document.getElementById("template2");
+      demo.data = {
+        current_user: "Tangere"
+      }
+    });
   </script>
+
 </body>
 
 </html>
