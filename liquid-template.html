@@ -14,30 +14,33 @@
 
       },
       render: function () {
+        try {
+          var src = this.innerHTML.trim();
+          if (!src) return;
 
-        var src = this.innerHTML.trim();
-        if (!src) return;
+          var tmpl = Liquid.parse(src);
 
-        var tmpl = Liquid.parse(src);
+          var html = tmpl.render(this.data);
 
-        // wrap data into data.data to make syntax compatible to embeded raw binding
-        var data = {};
-        data.data = this.data;
-        
-        var html = tmpl.render(data);
+          //this.shadowRoot.innerHTML = html;            
 
-        //this.shadowRoot.innerHTML = html;            
-        
-        // based on code from injectBoundHTML
-        var template = document.createElement('template');
-        template.innerHTML = html;
-        var fragment = this.instanceTemplate(template);
-        this.shadowRoot.textContent = '';
-        this.shadowRoot.appendChild(fragment);
-        
+          // based on code from injectBoundHTML
+          var template = document.createElement('template');
+          template.innerHTML = html;
+          var fragment = this.instanceTemplate(template);
+          this.shadowRoot.textContent = '';
+          this.shadowRoot.appendChild(fragment);
+          
+        } catch (ex) {
+          var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
+          console.log(em);
+          var emdiv = document.createElement('div');
+          emdiv.innerHTML = em ;
+          this.shadowRoot.appendChild(emdiv);
+        }
       },
       dataChanged: function () {
-
+        
         this.render();
 
       },

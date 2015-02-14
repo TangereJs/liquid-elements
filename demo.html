@@ -17,12 +17,12 @@
 
   <div class="demo">
     <liquid-template id="template1">
-      <i>Native Liquid binding:</i><br>
-      Hello, {{ data.current_user }}!
+
+      Hello, {{ current_user }}!
       <br>
-      <br>
-      <i>Embeded raw Polymer binding:</i><br>
-      Hello,{% raw %}{{ data.current_user }}{% endraw %}!
+      <br>      
+      <a on-click='{% mustache clickhandler %}'>Click me</a> 
+      
     </liquid-template>
   </div>
 

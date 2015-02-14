@@ -1,2 +1,19 @@
-
 <script src="../liquid.js/dist/liquid.js"></script>
+
+<script>
+  Liquid.Template.registerTag('mustache', Liquid.Tag.extend({
+    tagSyntax: /(\w+)/,
+
+    init: function (tagName, markup, tokens) {      
+      var parts = markup.match(this.tagSyntax)
+      if (parts) {
+        this.to = parts[1];
+      } else {
+        throw ("Syntax error in 'mustache' - Valid syntax: mustache [var]");
+      }      
+    },
+    render: function (context) {            
+      return '{{ ' + this.to + ' }}';
+    }
+  }));
+</script>
