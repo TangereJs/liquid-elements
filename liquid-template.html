@@ -15,11 +15,11 @@
         data: {},
 
         ready: function () {
-          this.templateCache = templateCache;
+          this.templateCache = templateCache;          
         },
 
         domReady: function () {
-
+          
         },
 
         render: function () {
@@ -48,9 +48,16 @@
         },
 
         getCompiledTemplate: function () {
+       
           var src = this.innerHTML.trim();
           if (!src) return null;
 
+          // is content wrapped into <template> to allow nested components?
+          if(src == "<template></template>") {
+            var srctmpl = this.querySelector('template');
+            src = srctmpl.instanceRef_.innerHTML.trim();
+          }
+          
           var cacheKey = "unknown";
 
           if (this.parentNode) {
