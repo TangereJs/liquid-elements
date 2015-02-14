@@ -1,0 +1,49 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="liquid-import.html">
+
+
+<polymer-element name="liquid-template" attributes="data">
+  <template>
+
+  </template>
+
+  <script>
+    Polymer('liquid-template', {
+      data: {},
+      domReady: function () {
+
+      },
+      render: function () {
+
+        var src = this.innerHTML.trim();
+        if (!src) return;
+
+        var tmpl = Liquid.parse(src);
+
+        // wrap data into data.data to make syntax compatible to embeded raw binding
+        var data = {};
+        data.data = this.data;
+        
+        var html = tmpl.render(data);
+
+        //this.shadowRoot.innerHTML = html;            
+        
+        // based on code from injectBoundHTML
+        var template = document.createElement('template');
+        template.innerHTML = html;
+        var fragment = this.instanceTemplate(template);
+        this.shadowRoot.textContent = '';
+        this.shadowRoot.appendChild(fragment);
+        
+      },
+      dataChanged: function () {
+
+        this.render();
+
+      },
+      ready: function () {
+
+      }
+    });
+  </script>
+</polymer-element>

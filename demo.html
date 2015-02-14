@@ -1,0 +1,39 @@
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width" />
+  <title>liquid-template demo</title>
+
+  <script src="../webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="../polymer/polymer.html" />
+  <link rel="import" href="liquid-template.html" />
+
+  <style>
+  </style>
+
+</head>
+
+<body unresolved>
+
+  <div class="demo">
+    <liquid-template id="template1">
+      <i>Native Liquid binding:</i><br>
+      Hello, {{ data.current_user }}!
+      <br>
+      <br>
+      <i>Embeded raw Polymer binding:</i><br>
+      Hello,{% raw %}{{ data.current_user }}{% endraw %}!
+    </liquid-template>
+  </div>
+
+  <script>
+    window.addEventListener('polymer-ready', function (e) {
+      var demo = document.getElementById("template1");
+      demo.data = {
+        current_user: "World"
+      }
+    });
+  </script>
+</body>
+
+</html>
