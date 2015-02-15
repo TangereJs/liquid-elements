@@ -1,2 +1,2 @@
-liquid-elements
+liquid-template
 ===============

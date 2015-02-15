@@ -1,5 +1,5 @@
 {
-  "name": "liquid-elements",
+  "name": "liquid-template",
   "private": true,
   "dependencies": {
     "polymer": "Polymer/polymer#master",
