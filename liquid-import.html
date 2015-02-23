@@ -1,6 +1,8 @@
 <script src="../liquid.js/dist/liquid.js"></script>
 
 <script>
+  
+  // wrap value in {{ value }}
   Liquid.Template.registerTag('mustache', Liquid.Tag.extend({
     tagSyntax: /(\w+)/,
 
@@ -16,4 +18,16 @@
       return '{{ ' + this.to + ' }}';
     }
   }));
+
+
+  // Filters
+  Liquid.Template.registerFilter({
+
+    default: function (input, string) {
+      if(!!input) return input;
+      return (string || '').toString();
+    }
+
+  });
+
 </script>
