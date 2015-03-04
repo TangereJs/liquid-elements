@@ -1,0 +1,55 @@
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width" />
+  <title>liquid-template demo</title>
+
+  <script src="../webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="../polymer/polymer.html" />
+  <link rel="import" href="liquid-template.html" />
+
+  <style>
+  </style>
+
+</head>
+
+<body unresolved>
+
+  <polymer-element name="my-element">
+
+    <template>
+      <style>
+        .red {
+          color: red;
+        }
+      </style>
+      <a on-click='{{ clickhandler }}' class="red">Click me</a> 
+      <br>
+      <liquid-template id="template3" data="a">
+        <template>
+          inner template:
+          <a on-click='{% mustache clickhandler %}' class="red">Click me inner </a> 
+        </template>
+      </liquid-template>
+    </template>
+
+    <script>
+      Polymer({
+
+        clickhandler: function () {
+          alert();
+        }
+      });
+    </script>
+
+  </polymer-element>
+
+
+  <div class="demo">
+    <my-element></my-element>
+  </div>
+
+
+</body>
+
+</html>
