@@ -1,0 +1,39 @@
+<link rel="import" href="liquid-template.html" />
+<link rel="import" href="x-custom.html" />
+
+<dom-module id="my-element">
+
+  <template>
+
+    <style>
+      .red {
+        color: red;
+      }
+    </style>
+    <a on-click='clickhandler' class="red">Click me</a> 
+    <br>
+    <liquid-template id="template3" data="none">
+        <template>
+          <br>inner template: <a on-click='{% mustache clickhandler %}' class="red">Click me inner </a> 
+          <br>       
+        </template>
+      </liquid-template> 
+    <h1>xxxx</h1>
+    <x-custom id="a2" >aaa</x-custom>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: "my-element",
+    clickhandler: function () {
+      alert();
+    },
+    ready: function() {
+      var x = this.$.template3;
+      x.data = "lala";
+      var xa = this.$.a2;
+      debugger;
+      xa.opened = false;
+    }
+  });
+</script>

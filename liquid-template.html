@@ -1,100 +1,113 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="liquid-import.html">
 
-<polymer-element name="liquid-template" attributes="data">
-  <template>
 
-  </template>
+<script>
+  (function () {
+    var templateCache = {};
 
-  <script>
-    (function () {
-      var templateCache = {};
+    Polymer({
+      is: 'liquid-template',
+      properties: {
+        data: {
+          observer: 'dataChanged'
+        }
+      },
+      oberservers: {
+        'data': 'dataChanged'
+      },
+      configure: function () {
+        // return default values of properties
+        return {
+          data: 'auto'
+        };
+      },
+      ready: function () {
+        this.templateCache = templateCache;
+      },
 
-      Polymer('liquid-template', {
-        data: {},
+      domReady: function () {
 
-        ready: function () {
-          this.templateCache = templateCache;          
-        },
+      },
 
-        domReady: function () {
-          
-        },
+      render: function () {
+        try {
+          var tmpl = this.getCompiledTemplate();
+          if (!tmpl) return;
+          debugger;
+          var html = tmpl.render(this.data);
 
-        render: function () {
-          try {
-            var tmpl = this.getCompiledTemplate();
-            if (!tmpl) return;
+          //this.shadowRoot.innerHTML = html;            
 
-            var html = tmpl.render(this.data);
+          // based on code from injectBoundHTML, 
+          // but inject into parent/host if existing 
+          // reason: styles/event handlers should remain in parent and not in template
+          var template = document.createElement('template');
+          template.innerHTML = html;
 
-            //this.shadowRoot.innerHTML = html;            
-
-            // based on code from injectBoundHTML, 
-            // but inject into parent/host if existing 
-            // reason: styles/event handlers should remain in parent and not in template
-            var template = document.createElement('template');
-            template.innerHTML = html;
-            
-            var container = this;
-            if (this.parentNode.host) {
-              container = this.parentNode.host;
-            } else {
-              container.shadowRoot.textContent = '';
-            }
-            
-            var fragment = container.instanceTemplate(template);            
-            container.shadowRoot.appendChild(fragment);
-
-          } catch (ex) {
-            var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
-            console.log(em);
-            var emdiv = document.createElement('div');
-            emdiv.innerHTML = em;
-            this.shadowRoot.appendChild(emdiv);
-          }
-        },
-
-        getCompiledTemplate: function () {
-       
-          var src = this.innerHTML.trim();
-          if (!src) return null;
-
-          // is content wrapped into <template> to allow nested components?
-          if(src == "<template></template>") {
-            var srctmpl = this.querySelector('template');
-            src = srctmpl.instanceRef_.innerHTML.trim();
-          }
-          
-          var cacheKey = "unknown";
-
-          if (this.parentNode) {
-            if (this.parentNode.id) cacheKey = this.parentNode.id;
-            if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
+          var container = this;
+          if (this.parentNode.host) {
+            container = this.parentNode.host;
+          } else {
+            container.shadowRoot.textContent = '';
           }
 
-          // return compiled template if already cached
-          var cacheEntry = this.templateCache[cacheKey];
-          if(cacheEntry) {            
-            if(cacheEntry.template == src)  return cacheEntry.compiledTemplate;
-          }
+          var fragment = container.instanceTemplate(template);
+          container.shadowRoot.appendChild(fragment);
 
-          var tmpl = Liquid.parse(src);
-          
-          // store compiled template in cache
-          this.templateCache[cacheKey] = { template: src, compiledTemplate: tmpl }              
-          
-          return tmpl;
-        },
+        } catch (ex) {
+          var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
+          console.log(em);
+          var emdiv = document.createElement('div');
+          emdiv.innerHTML = em;
+          this.shadowRoot.appendChild(emdiv);
+        }
+      },
 
-        dataChanged: function () {
+      getCompiledTemplate: function () {
 
-          this.render();
+        var src = this.innerHTML.trim();
+        if (!src) return null;
 
+        // is content wrapped into <template> to allow nested components?
+        if (src == "<template></template>") {
+          var srctmpl = this.querySelector('template');
+          src = srctmpl.instanceRef_.innerHTML.trim();
         }
 
-      });
+        var cacheKey = "unknown";
 
-    })();
-  </script>
-</polymer-element>
+        if (this.parentNode) {
+          if (this.parentNode.id) cacheKey = this.parentNode.id;
+          if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
+        }
+
+        // return compiled template if already cached
+        var cacheEntry = this.templateCache[cacheKey];
+        if (cacheEntry) {
+          if (cacheEntry.template == src) return cacheEntry.compiledTemplate;
+        }
+
+        var tmpl = Liquid.parse(src);
+
+        // store compiled template in cache
+        this.templateCache[cacheKey] = {
+          template: src,
+          compiledTemplate: tmpl
+        }
+
+        return tmpl;
+      },
+
+
+      dataChanged: function () {
+        debugger;
+        this.render();
+
+      }
+
+    });
+
+  })();
+</script>
+

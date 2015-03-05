@@ -1,0 +1,23 @@
+<script>
+Polymer({
+
+  is: 'x-custom',
+
+  propertiesConfig: {
+    opened: {
+      type: Boolean,
+      observer: 'openedChanged',
+      value: true
+    }
+  },
+
+
+  openedChanged: function (newVal, oldVal) {
+    console.log('openedChanged', newVal, oldVal);
+  },
+
+  ready: function() {
+    console.log('ready');
+  }
+});
+</script>
