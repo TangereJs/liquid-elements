@@ -3,111 +3,127 @@
 
 
 <script>
-  (function () {
-    var templateCache = {};
+  using('Annotations', function (Annotations) {
+    (function (Annotations) {
+      var templateCache = {};
 
-    Polymer({
-      is: 'liquid-template',
-      properties: {
-        data: {
-          observer: 'dataChanged'
-        }
-      },
-      oberservers: {
-        'data': 'dataChanged'
-      },
-      configure: function () {
-        // return default values of properties
-        return {
-          data: 'auto'
-        };
-      },
-      ready: function () {
-        this.templateCache = templateCache;
-      },
+      Polymer({
 
-      domReady: function () {
+        is: 'liquid-template',
 
-      },
+        properties: {
+          data: {
+            observer: 'dataChanged',
+            value: ''
+          }
+        },
 
-      render: function () {
-        try {
-          var tmpl = this.getCompiledTemplate();
-          if (!tmpl) return;
-          debugger;
-          var html = tmpl.render(this.data);
+        templateCache: {},
+        created: function () {
+          this.templateCache = templateCache;
+        },
 
-          //this.shadowRoot.innerHTML = html;            
+        ready: function () {
+          
+        },
 
-          // based on code from injectBoundHTML, 
-          // but inject into parent/host if existing 
-          // reason: styles/event handlers should remain in parent and not in template
-          var template = document.createElement('template');
-          template.innerHTML = html;
+        render: function () {
+          try {
 
-          var container = this;
-          if (this.parentNode.host) {
-            container = this.parentNode.host;
-          } else {
-            container.shadowRoot.textContent = '';
+            var tmpl = this.getCompiledTemplate();
+            if (!tmpl) return;
+
+            var html = tmpl.render(this.data);
+
+            var template = document.createElement('template');
+            template.innerHTML = html;
+
+            var fragment = this.instanceTemplate(template);
+            Polymer.dom.appendChild(fragment, this.root);
+
+            // -- parse appened code for list of on-* event bindings --
+            var list = [];
+            Annotations._parseNodeAnnotations(this.root, list);
+
+            // -- create listeners on parent node for on-* events 
+            list.forEach(function (a) {
+              if (a.events && a.events.length) {
+                var node = this.findAnnotatedNode(this.root, a);                
+                a.events.forEach(function (e) {
+                  this.parentNode.host.listen(node, e.name, e.value);
+                }, this);
+              }
+            }, this);
+
+          } catch (ex) {
+            var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
+            console.log(em);
+            var emdiv = document.createElement('div');
+            emdiv.innerHTML = em;
+            Polymer.dom.appendChild(emdiv, this.root);;
+          }
+        },
+
+        findAnnotatedNode: function (root, annote) {
+          // recursively ascend tree until we hit root
+          var parent = annote.parent &&
+            Annotations.findAnnotatedNode(root, annote.parent);
+          // unwind the stack, returning the indexed node at each level
+          return !parent ? root :
+            Annotations._localSubTree(parent, root)[annote.index];
+        },
+
+        getCompiledTemplate: function () {
+
+          var src = this.innerHTML.trim();
+          if (!src) return null;
+
+          // is content wrapped into <template> to allow nested components?
+          if (this.children.length == 1 && this.children[0].tagName == "TEMPLATE") {
+
+            var srctmpl = Polymer.dom.querySelector('template', this);
+
+            //converting the fragment content using a throwaway intermediary DOM element (div):
+            var tmpdiv = document.createElement('div');
+            tmpdiv.appendChild(srctmpl._content.cloneNode(true));
+
+            src = tmpdiv.innerHTML.trim();
+
+            //Polymer.dom.removeChild(srctmpl,this);
           }
 
-          var fragment = container.instanceTemplate(template);
-          container.shadowRoot.appendChild(fragment);
+          var cacheKey = "unknown";
 
-        } catch (ex) {
-          var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
-          console.log(em);
-          var emdiv = document.createElement('div');
-          emdiv.innerHTML = em;
-          this.shadowRoot.appendChild(emdiv);
-        }
-      },
+          if (this.parentNode) {
+            if (this.parentNode.id) cacheKey = this.parentNode.id;
+            if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
+          }
 
-      getCompiledTemplate: function () {
+          // return compiled template if already cached
+          var cacheEntry = this.templateCache[cacheKey];
+          if (cacheEntry) {
+            if (cacheEntry.template == src) return cacheEntry.compiledTemplate;
+          }
 
-        var src = this.innerHTML.trim();
-        if (!src) return null;
+          var tmpl = Liquid.parse(src);
 
-        // is content wrapped into <template> to allow nested components?
-        if (src == "<template></template>") {
-          var srctmpl = this.querySelector('template');
-          src = srctmpl.instanceRef_.innerHTML.trim();
-        }
+          // store compiled template in cache
+          this.templateCache[cacheKey] = {
+            template: src,
+            compiledTemplate: tmpl
+          }
 
-        var cacheKey = "unknown";
+          return tmpl;
+        },
 
-        if (this.parentNode) {
-          if (this.parentNode.id) cacheKey = this.parentNode.id;
-          if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
-        }
 
-        // return compiled template if already cached
-        var cacheEntry = this.templateCache[cacheKey];
-        if (cacheEntry) {
-          if (cacheEntry.template == src) return cacheEntry.compiledTemplate;
+        dataChanged: function () {
+          this.render();
         }
 
-        var tmpl = Liquid.parse(src);
+      });
 
-        // store compiled template in cache
-        this.templateCache[cacheKey] = {
-          template: src,
-          compiledTemplate: tmpl
-        }
-
-        return tmpl;
-      },
-
-
-      dataChanged: function () {
-        debugger;
-        this.render();
-
-      }
-
-    });
-
-  })();
+    })(Annotations);
+  });
 </script>
 
