@@ -3,127 +3,125 @@
 
 
 <script>
-  using('Annotations', function (Annotations) {
-    (function (Annotations) {
-      var templateCache = {};
+  (function () {
+    var templateCache = {};
 
-      Polymer({
+    Polymer({
 
-        is: 'liquid-template',
+      is: 'liquid-template',
 
-        properties: {
-          data: {
-            observer: 'dataChanged',
-            value: ''
-          }
-        },
+      properties: {
+        data: {
+          observer: 'dataChanged',
+          value: ''
+        }
+      },
 
-        templateCache: {},
-        created: function () {
-          this.templateCache = templateCache;
-        },
+      templateCache: {},
+      created: function () {
+        this.templateCache = templateCache;
+      },
 
-        ready: function () {
-          
-        },
+      ready: function () {
 
-        render: function () {
-          try {
+      },
 
-            var tmpl = this.getCompiledTemplate();
-            if (!tmpl) return;
+      render: function () {
+        try {
 
-            var html = tmpl.render(this.data);
+          var tmpl = this.getCompiledTemplate();
+          if (!tmpl) return;
 
-            var template = document.createElement('template');
-            template.innerHTML = html;
+          var html = tmpl.render(this.data);
 
-            var fragment = this.instanceTemplate(template);
-            Polymer.dom.appendChild(fragment, this.root);
+          var template = document.createElement('template');
+          template.innerHTML = html;
 
-            // -- parse appened code for list of on-* event bindings --
-            var list = [];
-            Annotations._parseNodeAnnotations(this.root, list);
+          var fragment = this.instanceTemplate(template);
+          Polymer.dom.appendChild(fragment, this.root);
 
-            // -- create listeners on parent node for on-* events 
-            list.forEach(function (a) {
-              if (a.events && a.events.length) {
-                var node = this.findAnnotatedNode(this.root, a);                
-                a.events.forEach(function (e) {
-                  this.parentNode.host.listen(node, e.name, e.value);
-                }, this);
-              }
-            }, this);
+          // -- parse appened code for list of on-* event bindings --
+          var list = [];
+          Polymer.Annotations._parseNodeAnnotations(this.root, list);
 
-          } catch (ex) {
-            var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
-            console.log(em);
-            var emdiv = document.createElement('div');
-            emdiv.innerHTML = em;
-            Polymer.dom.appendChild(emdiv, this.root);;
-          }
-        },
+          // -- create listeners on parent node for on-* events 
+          list.forEach(function (a) {
+            if (a.events && a.events.length) {
+              var node = this.findAnnotatedNode(this.root, a);
+              a.events.forEach(function (e) {
+                this.parentNode.host.listen(node, e.name, e.value);
+              }, this);
+            }
+          }, this);
 
-        findAnnotatedNode: function (root, annote) {
-          // recursively ascend tree until we hit root
-          var parent = annote.parent &&
-            Annotations.findAnnotatedNode(root, annote.parent);
-          // unwind the stack, returning the indexed node at each level
-          return !parent ? root :
-            Annotations._localSubTree(parent, root)[annote.index];
-        },
+        } catch (ex) {
+          var em = 'Exception caught liquid-template.render: ' + (ex.stack || ex);
+          console.log(em);
+          var emdiv = document.createElement('div');
+          emdiv.innerHTML = em;
+          Polymer.dom.appendChild(emdiv, this.root);;
+        }
+      },
 
-        getCompiledTemplate: function () {
+      findAnnotatedNode: function (root, annote) {
+        // recursively ascend tree until we hit root
+        var parent = annote.parent &&
+          Polymer.Annotations.findAnnotatedNode(root, annote.parent);
+        // unwind the stack, returning the indexed node at each level
+        return !parent ? root :
+          Polymer.Annotations._localSubTree(parent, root)[annote.index];
+      },
 
-          var src = this.innerHTML.trim();
-          if (!src) return null;
+      getCompiledTemplate: function () {
 
-          // is content wrapped into <template> to allow nested components?
-          if (this.children.length == 1 && this.children[0].tagName == "TEMPLATE") {
+        var src = this.innerHTML.trim();
+        if (!src) return null;
 
-            var srctmpl = Polymer.dom.querySelector('template', this);
+        // is content wrapped into <template> to allow nested components?
+        if (this.children.length == 1 && this.children[0].tagName == "TEMPLATE") {
 
-            //converting the fragment content using a throwaway intermediary DOM element (div):
-            var tmpdiv = document.createElement('div');
-            tmpdiv.appendChild(srctmpl._content.cloneNode(true));
+          var srctmpl = Polymer.dom.querySelector('template', this);
 
-            src = tmpdiv.innerHTML.trim();
+          //converting the fragment content using a throwaway intermediary DOM element (div):
+          var tmpdiv = document.createElement('div');
+          tmpdiv.appendChild(srctmpl._content.cloneNode(true));
 
-            //Polymer.dom.removeChild(srctmpl,this);
-          }
+          src = tmpdiv.innerHTML.trim();
 
-          var cacheKey = "unknown";
-
-          if (this.parentNode) {
-            if (this.parentNode.id) cacheKey = this.parentNode.id;
-            if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
-          }
-
-          // return compiled template if already cached
-          var cacheEntry = this.templateCache[cacheKey];
-          if (cacheEntry) {
-            if (cacheEntry.template == src) return cacheEntry.compiledTemplate;
-          }
-
-          var tmpl = Liquid.parse(src);
-
-          // store compiled template in cache
-          this.templateCache[cacheKey] = {
-            template: src,
-            compiledTemplate: tmpl
-          }
-
-          return tmpl;
-        },
-
-
-        dataChanged: function () {
-          this.render();
+          //Polymer.dom.removeChild(srctmpl,this);
         }
 
-      });
+        var cacheKey = "unknown";
 
-    })(Annotations);
-  });
+        if (this.parentNode) {
+          if (this.parentNode.id) cacheKey = this.parentNode.id;
+          if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
+        }
+
+        // return compiled template if already cached
+        var cacheEntry = this.templateCache[cacheKey];
+        if (cacheEntry) {
+          if (cacheEntry.template == src) return cacheEntry.compiledTemplate;
+        }
+
+        var tmpl = Liquid.parse(src);
+
+        // store compiled template in cache
+        this.templateCache[cacheKey] = {
+          template: src,
+          compiledTemplate: tmpl
+        }
+
+        return tmpl;
+      },
+
+
+      dataChanged: function () {
+        this.render();
+      }
+
+    });
+
+  })();
 </script>
 
