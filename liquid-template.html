@@ -11,10 +11,14 @@
       is: 'liquid-template',
 
       properties: {
-        data: {
-          observer: 'dataChanged',
-          value: ''
+        model: {
+          value: '',
+          notify: true
         }
+      },
+
+      observers: {
+        'model.*': 'modelChanged'
       },
 
       templateCache: {},
@@ -29,17 +33,20 @@
       render: function () {
         try {
 
-          var tmpl = this.getCompiledTemplate();
+          var tmpl = this._getCompiledTemplate();
           if (!tmpl) return;
 
-          var html = tmpl.render(this.data);
+          var html = tmpl.render(this.model);
 
+          /*
           var template = document.createElement('template');
           template.innerHTML = html;
 
-          var fragment = this.instanceTemplate(template);
+          var fragment = this.instanceTemplate(template);          
           Polymer.dom.appendChild(fragment, this.root);
-
+          */
+          this.root.innerHTML = html;
+          
           // -- parse appened code for list of on-* event bindings --
           var list = [];
           Polymer.Annotations._parseNodeAnnotations(this.root, list);
@@ -47,7 +54,7 @@
           // -- create listeners on parent node for on-* events 
           list.forEach(function (a) {
             if (a.events && a.events.length) {
-              var node = this.findAnnotatedNode(this.root, a);
+              var node = this._findAnnotatedNode(this.root, a);
               a.events.forEach(function (e) {
                 this.parentNode.host.listen(node, e.name, e.value);
               }, this);
@@ -63,7 +70,7 @@
         }
       },
 
-      findAnnotatedNode: function (root, annote) {
+      _findAnnotatedNode: function (root, annote) {
         // recursively ascend tree until we hit root
         var parent = annote.parent &&
           Polymer.Annotations.findAnnotatedNode(root, annote.parent);
@@ -72,7 +79,10 @@
           Polymer.Annotations._localSubTree(parent, root)[annote.index];
       },
 
-      getCompiledTemplate: function () {
+      _getCompiledTemplate: function () {
+        
+        // if cached - return compiled template for this node
+        if(!!this._liquidTemplate) return this._liquidTemplate;
 
         var src = this.innerHTML.trim();
         if (!src) return null;
@@ -112,11 +122,13 @@
           compiledTemplate: tmpl
         }
 
+        this._liquidTemplate = tmpl;
+        
         return tmpl;
       },
 
 
-      dataChanged: function () {
+      modelChanged: function () {
         this.render();
       }
 

@@ -13,35 +13,47 @@
 
     <a on-click='clickhandler' class="red">Click me</a> 
     <br>
-    <liquid-template id="template3" data="none">
+    <liquid-template id="template3" model="{{user}}">
       <template>
+        <br>Hello {{name.first}} {{name.last}} - Counter = {{counter}}
         <br>inner template: <a on-click='clickhandler' class="red">Click me inner </a> 
         <br>
       </template>
     </liquid-template>
   </template>
 </dom-module>
+
 <script>
   Polymer({
     is: "my-element",
     properties: {
-      user: {
+      hello: {
         type: String,
-        value: "world"
-      },
-      isHappy: Boolean,
-      count: {
-        type: Number,
-        readOnly: true,
+        value: "world",
         notify: true
+      },
+      user: {
+        type: Object,
+        notify: true,
+        value: {
+          name: {
+            first: 'James',
+            last: 'Cook',           
+          },
+          counter: 1
+        }        
       }
     },
-    clickhandler: function (e) {
-      alert("clicked on:\n " + e.toElement.outerHTML);
+    clickhandler: function (e) {      
+      
+      // setPathValue is required to notify template(s) about changed value
+      this.setPathValue('user.counter', this.user.counter + 1);
+      
+      //this.$.template3.render();
+
+      //alert("clicked on:\n " + e.toElement.outerHTML);
     },
     ready: function () {
-      //var x = this.$.template3;
-      //x.data = "lala";
     }
   });
 </script>
