@@ -23,6 +23,7 @@
 
       templateCache: {},
       created: function () {
+        console.log("CREATED");
         this.templateCache = templateCache;
       },
 
@@ -46,7 +47,7 @@
           Polymer.dom.appendChild(fragment, this.root);
           */
           this.root.innerHTML = html;
-          
+
           // -- parse appened code for list of on-* event bindings --
           var list = [];
           Polymer.Annotations._parseNodeAnnotations(this.root, list);
@@ -80,9 +81,9 @@
       },
 
       _getCompiledTemplate: function () {
-        
+
         // if cached - return compiled template for this node
-        if(!!this._liquidTemplate) return this._liquidTemplate;
+        if (!!this._liquidTemplate) return this._liquidTemplate;
 
         var src = this.innerHTML.trim();
         if (!src) return null;
@@ -108,22 +109,30 @@
           if (this.parentNode.host) cacheKey = this.parentNode.host.nodeName;
         }
 
-        // return compiled template if already cached
+        var tmpl = null;
+
+        // use compiled template if already cached
         var cacheEntry = this.templateCache[cacheKey];
         if (cacheEntry) {
-          if (cacheEntry.template == src) return cacheEntry.compiledTemplate;
+
+          if (cacheEntry.template == src) tmpl = cacheEntry.compiledTemplate;
+
+        } else {
+
+          tmpl = Liquid.parse(src);
+
+          // store compiled template in cache
+          this.templateCache[cacheKey] = {
+            template: src,
+            compiledTemplate: tmpl
+          }
+
         }
 
-        var tmpl = Liquid.parse(src);
 
-        // store compiled template in cache
-        this.templateCache[cacheKey] = {
-          template: src,
-          compiledTemplate: tmpl
-        }
-
+        // store compiled template per node
         this._liquidTemplate = tmpl;
-        
+
         return tmpl;
       },
 
