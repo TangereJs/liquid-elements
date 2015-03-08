@@ -22,8 +22,8 @@
       },
 
       templateCache: {},
+      
       created: function () {
-        console.log("CREATED");
         this.templateCache = templateCache;
       },
 
@@ -50,6 +50,9 @@
 
           // -- parse appened code for list of on-* event bindings --
           var list = [];
+          var parent = this.parentNode;
+          if(!!parent.host) parent = parent.host;
+          
           Polymer.Annotations._parseNodeAnnotations(this.root, list);
 
           // -- create listeners on parent node for on-* events 
@@ -57,7 +60,7 @@
             if (a.events && a.events.length) {
               var node = this._findAnnotatedNode(this.root, a);
               a.events.forEach(function (e) {
-                this.parentNode.host.listen(node, e.name, e.value);
+                parent.listen(node, e.name, e.value);
               }, this);
             }
           }, this);
