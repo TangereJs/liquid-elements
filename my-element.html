@@ -19,7 +19,7 @@
         <br>inner template: <a on-click='clickhandler' class="red">Click me inner </a> 
         <br>
       </template>
-    </liquid-template>
+    </liquid-template> 
   </template>
 </dom-module>
 
@@ -43,15 +43,14 @@
           counter: 1
         }        
       }
-    },
+    },    
     clickhandler: function (e) {      
       
       // setPathValue is required to notify template(s) about changed value
       this.setPathValue('user.counter', this.user.counter + 1);
       
-      //this.$.template3.render();
-
-      //alert("clicked on:\n " + e.toElement.outerHTML);
+      //this.$.template3.render(); 
+      console.log("clicked on " + this.id +": \n " + e.toElement.outerHTML);
     },
     ready: function () {
     }
