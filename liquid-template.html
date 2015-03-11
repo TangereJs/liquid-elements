@@ -70,7 +70,7 @@
           console.log(em);
           var emdiv = document.createElement('div');
           emdiv.innerHTML = em;
-          Polymer.dom.appendChild(emdiv, this.root);;
+          Polymer.dom(this.root).appendChild(emdiv);
         }
       },
 
@@ -94,7 +94,7 @@
         // is content wrapped into <template> to allow nested components?
         if (this.children.length == 1 && this.children[0].tagName == "TEMPLATE") {
 
-          var srctmpl = Polymer.dom.querySelector('template', this);
+          var srctmpl = Polymer.dom(this).querySelector('template');
 
           //converting the fragment content using a throwaway intermediary DOM element (div):
           var tmpdiv = document.createElement('div');
