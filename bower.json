@@ -2,7 +2,7 @@
   "name": "liquid-template",
   "private": true,
   "dependencies": {
-    "polymer": "Polymer/polymer#master",
+    "tangere": "TangereJs/tangere#master",
     "liquid.js": "TangereJs/liquid.js#master"
   }
 }
